@@ -1,9 +1,9 @@
 (() => {
   const C = {
-    // Theme — Pembe Şık (Lavish/luxury pet spa)
-    primary:   '#C9184A',
-    textColor: '#6B4C5A',
-    dark:      '#1A0010',
+    // Theme — Teal Modern
+    primary:   '#0A7E8C',
+    textColor: '#3D6B72',
+    dark:      '#051F24',
 
     // Business identity
     nameSub:     'LAVISH LIFE',
@@ -109,6 +109,12 @@
 
   const setText = (sel, val)      => { const el = $(sel); if (el) el.textContent = val; };
   const setHtml = (sel, val)      => { const el = $(sel); if (el) el.innerHTML   = val; };
+  // Updates only the visible text node inside an element (preserves child SVGs etc.)
+  const setTextNode = (el, val) => {
+    if (!el) return;
+    const node = [...el.childNodes].find(n => n.nodeType === 3 && n.textContent.trim());
+    if (node) node.textContent = ` ${val} `; else el.append(` ${val} `);
+  };
 
   document.addEventListener('DOMContentLoaded', () => {
 
@@ -137,8 +143,8 @@
     setText('.hero__desc', C.tagline);
 
     const heroActions = $$('.hero__actions a');
-    if (heroActions[0]) heroActions[0].href = waHref;
-    if (heroActions[1]) heroActions[1].href = telHref;
+    if (heroActions[0]) { heroActions[0].href = waHref;  setTextNode(heroActions[0], 'WhatsApp Us'); }
+    if (heroActions[1]) { heroActions[1].href = telHref; setTextNode(heroActions[1], 'Call Us'); }
 
     const tagsRow = $('.hero__services-row');
     if (tagsRow) {
@@ -250,21 +256,27 @@
 
     const conItems = $$('.contact__item');
     if (conItems[0]) {
+      const strong = conItems[0].querySelector('strong');
+      if (strong) strong.textContent = 'Address';
       const p = conItems[0].querySelector('p');
       if (p) p.textContent = C.address;
     }
     if (conItems[1]) {
+      const strong = conItems[1].querySelector('strong');
+      if (strong) strong.textContent = 'Phone';
       const a = conItems[1].querySelector('a');
       if (a) { a.href = telHref; a.textContent = C.phone; }
     }
     if (conItems[2]) {
+      const strong = conItems[2].querySelector('strong');
+      if (strong) strong.textContent = 'Business Hours';
       const ps = conItems[2].querySelectorAll('p');
       if (ps[0]) ps[0].innerHTML = C.hoursLines.slice(0, 2).join('<br>');
       if (ps[1]) ps[1].innerHTML = C.hoursLines.slice(2).join('<br>');
     }
 
     const conActionBtns = $$('.contact__actions a');
-    if (conActionBtns[0]) { conActionBtns[0].href = waHref; conActionBtns[0].textContent = 'WhatsApp Us'; }
+    if (conActionBtns[0]) { conActionBtns[0].href = waHref;  conActionBtns[0].textContent = 'WhatsApp Us'; }
     if (conActionBtns[1]) { conActionBtns[1].href = telHref; conActionBtns[1].textContent = 'Call Us'; }
 
     const mapFrame = $('.contact__map iframe');
