@@ -149,12 +149,90 @@
     ).join('');
   }
 
-  const heroImg = $('.hero__right img');
-  if (heroImg) { heroImg.src = C.heroImg; heroImg.alt = C.heroImgAlt; }
-
   const imgBadge = $('.hero__img-badge');
   if (imgBadge) imgBadge.innerHTML =
     `<strong>${C.rating}</strong><span>${C.ratingStars}</span><small>${C.reviewCount} reviews</small>`;
+
+  // ── SCROLL SCRUBBING (frame-by-frame video) ───────────────────────────────
+  (() => {
+    const FRAME_COUNT = 122;
+    const FRAMES_DIR  = 'frames/';
+    const FRAME_PFX   = 'ezgif-frame-';
+    const SCROLL_PX   = FRAME_COUNT * 22; // ~2684px total scroll range
+
+    const hero = document.getElementById('hero');
+    if (!hero) return;
+
+    // Wrap hero in a tall container so it sticks while frames play
+    const wrapper = document.createElement('div');
+    wrapper.id = 'hero-scrub-wrapper';
+    wrapper.style.cssText = 'position:relative;';
+    hero.parentNode.insertBefore(wrapper, hero);
+    wrapper.appendChild(hero);
+
+    hero.style.position = 'sticky';
+    hero.style.top      = '0';
+    hero.style.zIndex   = '1';
+
+    const spacer = document.createElement('div');
+    spacer.style.height = SCROLL_PX + 'px';
+    wrapper.appendChild(spacer);
+
+    // Replace hero right <img> with a <canvas>
+    const heroRight = hero.querySelector('.hero__right');
+    const heroImg   = heroRight && heroRight.querySelector('img');
+
+    const canvas = document.createElement('canvas');
+    canvas.id = 'hero-canvas';
+    canvas.style.cssText = [
+      'display:block',
+      'width:100%',
+      'height:100%',
+      'object-fit:cover',
+      'position:absolute',
+      'inset:0',
+    ].join(';');
+
+    if (heroRight) heroRight.style.position = 'relative';
+    if (heroImg)   { heroImg.style.display = 'none'; heroImg.after(canvas); }
+    else if (heroRight) heroRight.prepend(canvas);
+
+    const ctx = canvas.getContext('2d');
+
+    // Preload all frames
+    const frames = [];
+    let loaded = 0;
+
+    const draw = (idx) => {
+      const f = frames[idx];
+      if (!f || !f.complete || !f.naturalWidth) return;
+      if (canvas.width !== f.naturalWidth) {
+        canvas.width  = f.naturalWidth;
+        canvas.height = f.naturalHeight;
+      }
+      ctx.drawImage(f, 0, 0);
+    };
+
+    const onScroll = () => {
+      const top      = wrapper.getBoundingClientRect().top;
+      const progress = Math.max(0, Math.min(1, -top / SCROLL_PX));
+      draw(Math.min(FRAME_COUNT - 1, Math.floor(progress * FRAME_COUNT)));
+    };
+
+    for (let i = 0; i < FRAME_COUNT; i++) {
+      const img = new Image();
+      img.src = `${FRAMES_DIR}${FRAME_PFX}${String(i + 1).padStart(3, '0')}.jpg`;
+      frames[i] = img;
+      img.onload = () => {
+        loaded++;
+        if (loaded === 1) draw(0);           // show frame 1 ASAP
+        if (loaded === FRAME_COUNT) onScroll(); // sync to current scroll
+      };
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
 
   // STATS BAR
   $$('.stat-item').forEach((el, i) => {
