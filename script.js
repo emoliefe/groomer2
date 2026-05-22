@@ -12,6 +12,13 @@ const burger = document.getElementById('navBurger');
 const navLinks = document.getElementById('navLinks');
 
 burger.addEventListener('click', () => {
+  // Scroll-scrub animasyonu devam ediyorsa hamburgerı kilitle
+  const wrapper = document.getElementById('hero-scrub-wrapper');
+  if (wrapper) {
+    const top = wrapper.getBoundingClientRect().top;
+    const SCROLL_PX = 122 * 22; // client-config.js ile aynı: 2684px
+    if (top < 0 && top > -SCROLL_PX) return; // scrubbing aktif
+  }
   const open = navLinks.classList.toggle('open');
   burger.setAttribute('aria-expanded', String(open));
 });

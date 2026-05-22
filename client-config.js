@@ -155,6 +155,9 @@
 
   // ── SCROLL SCRUBBING (frame-by-frame video) ───────────────────────────────
   (() => {
+    // Mobilde (< 768px) scroll-scrubbing kapalı — sticky canvas istenmiyor
+    if (window.innerWidth < 768) return;
+
     const FRAME_COUNT = 122;
     const FRAMES_DIR  = 'frames/';
     const FRAME_PFX   = 'ezgif-frame-';
